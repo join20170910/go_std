@@ -1,31 +1,16 @@
 package main
 
 import (
+	"awesomeProject/crawler/engine"
+	"awesomeProject/crawler/zhenai/parser"
 	"fmt"
 	"regexp"
-
-	"io/ioutil"
-	"net/http"
 )
 
 func main() {
-	resp, err := http.Get("http://www.zhenai.com/zhenghun")
-	if err != nil {
-		panic(any(err))
-	}
-
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		all, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			panic(any(err))
-		}
-
-		// fmt.Printf("%s\n", all)
-		printCityList(all)
-	} else {
-		fmt.Println("Error: status code", resp.StatusCode)
-	}
+	engine.Run(
+		engine.Request{Url: "http://www.zhenai.com/zhenghun",
+			ParserFunc: parser.ParseCityList})
 }
 
 func printCityList(contents []byte) {
