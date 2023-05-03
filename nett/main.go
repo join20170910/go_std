@@ -6,7 +6,10 @@ import (
 )
 
 func handleConnection(conn net.Conn) {
-
+	defer func() {
+		recover()
+	}()
+	fmt.Println("handleConnection defer g ")
 	defer conn.Close()
 	var body [1024]byte
 	for true {
@@ -23,11 +26,21 @@ func handleConnection(conn net.Conn) {
 	}
 }
 
-func main() {
+// panic 终止 当前 协程的运行
+// panic 在退出协程之前 会执行所有已注册的defer
+// 在defer中执行recover,可拯救panic的协程
 
-	ln, err1 := net.Listen("tcp", "9999")
-	if err1 != nil {
-		return
+func main() {
+	var err any = "异常报错"
+	ln, err := net.Listen("tcp", "9999")
+
+	defer func() {
+		recover()
+	}()
+	if err != nil {
+
+		panic(any("异常报错"))
+
 	}
 	for true {
 		conn, err := ln.Accept()
