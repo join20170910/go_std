@@ -5,16 +5,9 @@ import (
 	"net"
 )
 
-func main() {
+func handleConnection(conn net.Conn) {
 
-	ln, err1 := net.Listen("tcp", "9999")
-	if err1 != nil {
-		return
-	}
-	conn, err := ln.Accept()
-	if err != nil {
-		panic(any("异常报错"))
-	}
+	defer conn.Close()
 	var body [1024]byte
 	for true {
 		_, err := conn.Read(body[:])
@@ -27,5 +20,20 @@ func main() {
 		if err != nil {
 			break
 		}
+	}
+}
+
+func main() {
+
+	ln, err1 := net.Listen("tcp", "9999")
+	if err1 != nil {
+		return
+	}
+	for true {
+		conn, err := ln.Accept()
+		if err != nil {
+			panic(any("异常报错"))
+		}
+		go handleConnection(conn)
 	}
 }
