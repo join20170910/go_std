@@ -1,6 +1,7 @@
 package main
 
 //  类似 java deamon 用法 ， 子 goroutine 运行完了 通知主 goroutine  使用：sync.WaitGroup
+// group.Add() 要与 group.Done()配套使用  最后 用 Wait()  它会阻塞住，到 add 为0
 import (
 	"fmt"
 	"sync"
