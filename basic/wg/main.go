@@ -13,9 +13,9 @@ func main() {
 	group.Add(100)
 	for i := 0; i < 100; i++ {
 		go func(i int) {
+			defer group.Done()
 			time.Sleep(1)
 			fmt.Println(i)
-			group.Done()
 		}(i)
 	}
 	group.Wait()
