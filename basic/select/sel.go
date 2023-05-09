@@ -13,22 +13,28 @@ import (
 // 空结构体
 var done = make(chan struct{}) // channel 是多线程安全的 channel 要初始化
 
-func go1() {
-	time.Sleep(time.Second)
+func go1(ch1 chan struct{}) {
+	time.Sleep(2 * time.Second)
 	fmt.Println("执行完成 G1")
-	done <- struct{}{}
+	ch1 <- struct{}{}
 }
 
-func go2() {
-	time.Sleep(2 * time.Second)
+func go2(ch2 chan struct{}) {
 	time.Sleep(time.Second)
 	fmt.Println("执行完成 G2")
-	done <- struct{}{}
+	ch2 <- struct{}{}
 }
 func main() {
-	go go1()
-	go go2()
-	<-done
-	<-done
-	fmt.Println("done")
+	// 需求：多个 goroutine 都在执行，在主的goroutine中监控，那个执行完成就能立马知道
+	ch1 := make(chan struct{})
+	ch2 := make(chan struct{})
+	go go1(ch1)
+	go go2(ch2)
+
+	select {
+	case <-ch1:
+		fmt.Println("G1 done")
+	case <-ch2:
+		fmt.Println("G2 done")
+	}
 }
