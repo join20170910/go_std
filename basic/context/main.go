@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -8,11 +9,11 @@ import (
 
 var wg sync.WaitGroup
 
-func cpuInfo(stop chan struct{}) {
+func cpuInfo(ctx context.Context) {
 	defer wg.Done()
 	for {
 		select {
-		case <-stop:
+		case <-ctx.Done():
 			fmt.Println("退出cpu监控")
 			return
 		default:
@@ -24,12 +25,14 @@ func cpuInfo(stop chan struct{}) {
 }
 func main() {
 	// 有一个 goroutine  监控 cpu 信息
-	var stop = make(chan struct{})
 
+	//context 包提供了三种函数 withCancel withTimeout, with value
+	//
+	ctx, cancel := context.WithCancel(context.Background())
 	wg.Add(1)
-	go cpuInfo(stop)
+	go cpuInfo(ctx)
 	time.Sleep(6 * time.Second)
-	stop <- struct{}{}
+	cancel()
 	wg.Wait()
 	fmt.Println("监控完成")
 
