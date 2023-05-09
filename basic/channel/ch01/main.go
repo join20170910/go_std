@@ -1,5 +1,23 @@
 package main
 
+import (
+	"fmt"
+	"time"
+)
+
+func producer(out chan<- int) {
+	for i := 0; i < 10; i++ {
+		out <- i * i
+	}
+	close(out)
+}
+
+func consumer(in <-chan int) {
+	for num := range in {
+		fmt.Printf("num=%d\r\n", num)
+	}
+
+}
 func main() {
 	//默认情况下，是双向的
 	// 单向 chan
@@ -14,5 +32,9 @@ func main() {
 
 	send <- 1
 	<-read
+	d := make(chan int)
+	go producer(d)
+	go consumer(d)
+	time.Sleep(10 * time.Second)
 
 }
