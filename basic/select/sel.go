@@ -20,21 +20,32 @@ func go1(ch1 chan struct{}) {
 }
 
 func go2(ch2 chan struct{}) {
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 	fmt.Println("执行完成 G2")
 	ch2 <- struct{}{}
 }
 func main() {
 	// 需求：多个 goroutine 都在执行，在主的goroutine中监控，那个执行完成就能立马知道
-	ch1 := make(chan struct{})
-	ch2 := make(chan struct{})
-	go go1(ch1)
-	go go2(ch2)
+	ch1 := make(chan struct{}, 1)
+	ch2 := make(chan struct{}, 2)
+	ch1 <- struct{}{}
+	ch2 <- struct{}{}
+	//go go1(ch1)
+	//go go2(ch2)
 
-	select {
-	case <-ch1:
-		fmt.Println("G1 done")
-	case <-ch2:
-		fmt.Println("G2 done")
+	// 监控 多个channel ，任何一个channel 返回 都 能知道
+	// 1 某个分支就绪了就执行，2.如果两个都 就绪了先执行哪个 ? 随机的 原因： 防止饥饿
+	timer := time.NewTimer(time.Second)
+	for {
+		select {
+		case <-ch1:
+			fmt.Println("G1 done")
+		case <-ch2:
+			fmt.Println("G2 done")
+		case <-timer.C:
+			fmt.Println("timeout default")
+			return
+		}
 	}
+
 }
