@@ -13,13 +13,18 @@ func bufferedChannel() {
 	c <- 2
 	c <- 3
 	c <- 4
+	close(c)
 	time.Sleep(time.Second)
 }
 
 func worker(id int, c chan int) {
 	for {
 		for {
-			fmt.Printf("Worker %d received %d\n", id, <-c)
+			n, ok := <-c
+			if !ok {
+				break
+			}
+			fmt.Printf("Worker %d received %d\n", id, n)
 		}
 	}
 }
