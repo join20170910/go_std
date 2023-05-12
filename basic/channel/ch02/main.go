@@ -24,8 +24,7 @@ func createWorker(id int) chan int {
 func chanDemo() {
 	var channels [10]chan int
 	for i := 0; i < 10; i++ {
-		channels[i] = make(chan int)
-		go worker(i, channels[i])
+		channels[i] = createWorker(i)
 	}
 	for i := 0; i < 10; i++ {
 		channels[i] <- 'a' + i
