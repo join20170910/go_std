@@ -18,14 +18,8 @@ func bufferedChannel() {
 }
 
 func worker(id int, c chan int) {
-	for {
-		for {
-			n, ok := <-c
-			if !ok {
-				break
-			}
-			fmt.Printf("Worker %d received %d\n", id, n)
-		}
+	for n := range c {
+		fmt.Printf("Worker %d received %d\n", id, n)
 	}
 }
 
