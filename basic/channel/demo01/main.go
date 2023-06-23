@@ -5,18 +5,21 @@ import (
 	"time"
 )
 
+// chan 做为 参数传递
+func worker(c chan int) {
+	for {
+		n := <-c
+		fmt.Println(n)
+
+	}
+}
 func main() {
 	chanDemo()
 }
 
 func chanDemo() {
 	c := make(chan int)
-	go func() {
-		for {
-			n := <-c
-			fmt.Println(n)
-		}
-	}()
+	go worker(c)
 
 	c <- 1
 	c <- 2
