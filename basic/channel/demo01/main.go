@@ -6,10 +6,10 @@ import (
 )
 
 // chan 做为 参数传递
-func worker(c chan int) {
+func worker(id int, c chan int) {
 	for {
 		n := <-c
-		fmt.Println(n)
+		fmt.Printf("Worker %d received %d\n", id, n)
 
 	}
 }
@@ -19,7 +19,7 @@ func main() {
 
 func chanDemo() {
 	c := make(chan int)
-	go worker(c)
+	go worker(1, c)
 
 	c <- 1
 	c <- 2
