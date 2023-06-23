@@ -8,8 +8,7 @@ import (
 // chan 做为 参数传递
 func worker(id int, c chan int) {
 	for {
-		n := <-c
-		fmt.Printf("Worker %d received %d\n", id, n)
+		fmt.Printf("Worker %d received %d\n", id, <-c)
 
 	}
 }
