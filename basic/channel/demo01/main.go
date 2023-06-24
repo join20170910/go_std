@@ -7,7 +7,11 @@ import (
 
 func worker(id int, c chan int) {
 	for {
-		fmt.Printf("Worker %d received %c\n", id, <-c)
+		n, ok := <-c
+		if !ok {
+			break
+		}
+		fmt.Printf("Worker %d received %c\n", id, n)
 	}
 }
 
@@ -28,9 +32,20 @@ func bufferedChannel() {
 	time.Sleep(time.Millisecond)
 
 }
+func closeChannel() {
+	c := make(chan int, 3)
+	go worker(0, c)
+	c <- 'a'
+	c <- 'b'
+	c <- 'c'
+	close(c)
+	time.Sleep(time.Millisecond)
+
+}
 func main() {
 	//chanDemo()
-	bufferedChannel()
+	//bufferedChannel()
+	closeChannel()
 }
 
 func chanDemo() {
