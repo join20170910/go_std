@@ -1,8 +1,6 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type worker struct {
 	in   chan int
@@ -11,11 +9,11 @@ type worker struct {
 
 func doWorker(id int, c chan int,
 	done chan bool) {
-	for {
-		for n := range c {
-			fmt.Printf("Worker %d received %d\n", id, n)
+	for n := range c {
+		fmt.Printf("Worker %d received %c\n", id, n)
+		go func() {
 			done <- true
-		}
+		}()
 	}
 }
 
@@ -38,14 +36,16 @@ func chanDemo() {
 	for i := 0; i < 10; i++ {
 		workers[i] = createWorker(i)
 	}
-	for i := 0; i < 10; i++ {
-		workers[i].in <- 'a' + i
-		//接收
-		<-workers[i].done
+
+	for i, w := range workers {
+		w.in <- 'a' + i
+
 	}
-	for i := 0; i < 10; i++ {
-		workers[i].in <- 'A' + i
-		//接收
-		<-workers[i].done
+	for i, w := range workers {
+		w.in <- 'A' + i
+	}
+	for _, w := range workers {
+		<-w.done
+		<-w.done
 	}
 }
