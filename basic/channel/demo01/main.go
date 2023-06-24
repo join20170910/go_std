@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// chan 做为 返回值
-func createWorker(id int) chan int {
+// chan 做为 发数据
+func createWorker(id int) chan<- int {
 	c := make(chan int)
 	go func() {
 		for {
@@ -20,7 +20,7 @@ func main() {
 }
 
 func chanDemo() {
-	var channels [10]chan int
+	var channels [10]chan<- int
 	for i := 0; i < 10; i++ {
 		channels[i] = createWorker(i)
 	}
