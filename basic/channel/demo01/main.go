@@ -5,18 +5,32 @@ import (
 	"time"
 )
 
+func worker(id int, c chan int) {
+	for {
+		fmt.Printf("Worker %d received %c\n", id, <-c)
+	}
+}
+
 // chan 做为 发数据
 func createWorker(id int) chan<- int {
 	c := make(chan int)
-	go func() {
-		for {
-			fmt.Printf("Worker %d received %c\n", id, <-c)
-		}
-	}()
+	go worker(id, c)
 	return c
 }
+
+// 缓冲区 大小为 3
+func bufferedChannel() {
+	c := make(chan int, 3)
+	go worker(0, c)
+	c <- 'a'
+	c <- 'b'
+	c <- 'c'
+	time.Sleep(time.Millisecond)
+
+}
 func main() {
-	chanDemo()
+	//chanDemo()
+	bufferedChannel()
 }
 
 func chanDemo() {
