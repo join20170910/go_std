@@ -20,6 +20,8 @@ func closed() {
 	intChan <- 50
 	close(intChan)
 	fmt.Printf("%v,%v\n", <-intChan, <-intChan)
+	// 写入数据 报错
+	intChan <- 1000
 }
 func demo01() {
 
