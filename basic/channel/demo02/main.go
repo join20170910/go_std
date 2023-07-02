@@ -10,16 +10,37 @@ import (
 var wg sync.WaitGroup
 
 func main() {
-	intChan := make(chan int, 50)
 	// demo01()
 	// closed()
 	//range01()
+	// writeAndReader()
+	only()
+}
+
+//自读自写
+func only() {
+	//默认情况下,管道是双向的  可读可写
+	// 声明为 只写
+	var intChan2 chan<- int
+	intChan2 = make(chan int, 3)
+	intChan2 <- 20
+	fmt.Println("intChan2", intChan2)
+	//num := <-intChan2
+	//fmt.Println(num)
+	// 声明 为 只读
+	var intChan3 <-chan int
+	if intChan3 != nil {
+		num1 := <-intChan3
+		fmt.Println("num1:", num1)
+	}
+}
+func writeAndReader() {
+	intChan := make(chan int, 50)
 	wg.Add(2)
 	go writeData(intChan)
 	go readData(intChan)
 	wg.Wait()
 }
-
 func writeData(intChan chan int) {
 	defer wg.Done()
 	for i := 0; i < 50; i++ {
