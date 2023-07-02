@@ -1,11 +1,42 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+// 主线程一直在阻塞,直到 wg 减为0 就停止
+var wg sync.WaitGroup
 
 func main() {
+	intChan := make(chan int, 50)
 	// demo01()
 	// closed()
-	range01()
+	//range01()
+	wg.Add(2)
+	go writeData(intChan)
+	go readData(intChan)
+	wg.Wait()
+}
+
+func writeData(intChan chan int) {
+	defer wg.Done()
+	for i := 0; i < 50; i++ {
+		intChan <- i
+		fmt.Println("写入的数据为:", i)
+		time.Sleep(time.Second)
+	}
+	// 关闭管道
+	close(intChan)
+}
+func readData(intChan chan int) {
+	defer wg.Done()
+	// 遍历
+	for v := range intChan {
+		fmt.Println("记取的数据为:", v)
+		time.Sleep(time.Second)
+	}
 }
 
 // 管道遍历
