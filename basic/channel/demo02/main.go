@@ -4,7 +4,27 @@ import "fmt"
 
 func main() {
 	// demo01()
-	closed()
+	// closed()
+	range01()
+}
+
+// 管道遍历
+func range01() {
+
+	var intChan chan int
+	// 初始化
+	intChan = make(chan int, 3)
+	intChan <- 10
+	num := 20
+	intChan <- num
+	intChan <- 50
+
+	// 管道 遍历前 没有关闭会出现deadlock 的错误
+	close(intChan)
+	// 遍历
+	for v := range intChan {
+		fmt.Printf("%v\n", v)
+	}
 }
 
 // 关闭功能读取数据测试
