@@ -1,57 +1,67 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/oklog/run"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 func main() {
-	g := run.Group{}
+
+	// 编排开始
+	var g run.Group
+	ctxAll, cancelAll := context.WithCancel(context.Background())
 	{
-		cancel := make(chan struct{})
+
+		// 处理信号退出的handler
+		term := make(chan os.Signal, 1)
+		signal.Notify(term, os.Interrupt, syscall.SIGTERM)
+		cancelC := make(chan struct{})
 		g.Add(
 			func() error {
 				select {
-				case <-cancel:
-					fmt.Println("Go routine 1 is closed")
-					break
+				case <-term:
+					fmt.Println("msg", "Receive SIGTERM ,exiting gracefully....")
+					cancelAll()
+					return nil
+				case <-cancelC:
+					fmt.Println("msg", "other cancel exiting")
+					return nil
 				}
-				return nil
 			},
 			func(err error) {
-				close(cancel)
+				close(cancelC)
 			},
 		)
 	}
 	{
-		cancel := make(chan struct{})
-		g.Add(
-			func() error {
-				select {
-				case <-cancel:
-					fmt.Println("Go routine 2 is closed")
-					break
-				}
-				return nil
-			},
-			func(err error) {
-				close(cancel)
-			})
-	}
-	{
-		g.Add(
-			func() error {
-				for i := 0; i < 3; i++ {
+		// logjob 结果的metrics http server
+		g.Add(func() error {
+			errChan := make(chan error, 1)
+			go func() {
+				for {
 					time.Sleep(time.Second * 1)
-					fmt.Println("Go routine 3 is sleeping...")
+					fmt.Println("Go routine 1 is sleeping...")
 				}
 				fmt.Println("Go routine 3 is closed")
+			}()
+			select {
+			case err := <-errChan:
+				fmt.Println("msg", "logjob.metrics.web.server.error", "err", err)
+				return err
+			case <-ctxAll.Done():
+				fmt.Println("msg", "receive_quit_signal_web_server_exit")
 				return nil
-			},
-			func(err error) {
-				return
-			})
+			}
+
+		}, func(err error) {
+			cancelAll()
+		},
+		)
 	}
 	g.Run()
 }
